@@ -1,0 +1,24 @@
+PASTA DE MÍDIAS — RECONECTAR (Versão InLead)
+═══════════════════════════════════════════
+
+QUIZ (quiz.html):
+  intro-quiz.jpg          → Imagem da tela de introdução (proporção 4:3 recomendada)
+  quiz-depoimento-1.jpg   → Print de depoimento (formato 9:16, tipo WhatsApp/Instagram)
+
+VSL (vsl.html):
+  vsl.mp4                 → Seu vídeo de vendas (formato vertical 9:16)
+
+LINK DO CHECKOUT:
+  Substitua todas as ocorrências de:
+  https://SEU-LINK-CHECKOUT-AQUI.com
+  pelo link real da sua página de checkout.
+  Aparece em: vsl.html (2 lugares)
+
+FLUXO DO FUNIL:
+  1. Usuário acessa quiz.html
+  2. Responde as perguntas (9 etapas)
+  3. Vê tela de resultado com gráfico
+  4. Clica "Ver meu diagnóstico completo"
+  5. Vai para vsl.html (nome personalizado)
+  6. Assiste o vídeo
+  7. Após 8 min, botão de compra aparece

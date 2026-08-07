@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>RECONECTAR — Diagnóstico do Loop da Desconexão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#fff;color:#030712;-webkit-font-smoothing:antialiased}
+
+.quiz-shell{display:flex;flex-direction:column;min-height:100svh;max-width:448px;margin:0 auto;padding:0 16px}
+
+/* top bar */
+.top-bar{position:sticky;top:0;z-index:100;background:#fff;padding:16px 0 12px;display:grid;grid-template-columns:32px 1fr 32px;align-items:center;gap:8px}
+.back-btn{background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:32px;height:32px;color:#030712;opacity:.5;transition:opacity .15s}
+.back-btn:hover{opacity:1}
+.progress-track{height:6px;background:#f1f1f1;border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;background:#030712;border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);width:0%}
+
+.screen{display:none;flex-direction:column;flex:1;padding:20px 0 40px}
+.screen.active{display:flex}
+
+/* intro */
+.intro-img{width:100%;border-radius:16px;overflow:hidden;margin:16px 0;aspect-ratio:4/3;background:#f1f1f1}
+.intro-img img{width:100%;height:100%;object-fit:cover;display:block}
+.intro-img-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem}
+.intro-title{font-size:22px;font-weight:800;line-height:1.25;text-align:center;margin-bottom:8px}
+.intro-title .hl{background:#16a34a;color:#fff;padding:0 4px;border-radius:4px}
+.intro-sub{font-size:14px;color:#6b7280;text-align:center;margin-bottom:20px;line-height:1.5}
+.intro-proof{font-size:13px;color:#6b7280;text-align:center;margin-top:12px}
+
+/* pergunta */
+.q-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding-top:24px}
+.q-title{font-size:22px;font-weight:800;line-height:1.3;text-align:center;margin-bottom:8px;color:#030712}
+.q-title .hl{background:#16a34a;color:#fff;padding:1px 5px;border-radius:4px}
+.q-hint{font-size:13px;color:#6b7280;text-align:center;font-style:italic;margin-bottom:24px;line-height:1.5}
+
+.options{display:flex;flex-direction:column;gap:10px}
+.options.two-col{flex-direction:row;gap:10px}
+.options.two-col .opt{flex:1}
+.opt{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:14px;cursor:pointer;text-align:left;width:100%;font-family:'Inter',sans-serif;font-size:15px;font-weight:500;color:#030712;transition:border-color .15s,background .15s,transform .1s;min-height:54px}
+.opt:hover{border-color:#030712}
+.opt.selected{border-color:#030712;background:#030712;color:#fff}
+.opt.selected .opt-letter{background:#fff;color:#030712}
+.opt.selected .opt-check{background:#fff;border-color:#fff}
+.opt.selected .opt-check::after{opacity:1;color:#030712}
+.opt-letter{flex-shrink:0;width:26px;height:26px;border-radius:6px;background:#f1f1f1;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#6b7280}
+.opt-emoji{font-size:22px;flex-shrink:0;line-height:1}
+.opt-check{flex-shrink:0;width:20px;height:20px;border-radius:5px;border:1.5px solid #d1d5db;background:#fff;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.opt-check::after{content:'✓';font-size:12px;font-weight:700;color:#fff;opacity:0;transition:opacity .15s}
+.opts-multi .opt{background:#f9fafb}
+.opts-multi .opt.selected{background:#030712}
+
+.btn-continue{margin-top:20px;width:100%;padding:16px;background:#16a34a;color:#fff;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s,transform .1s}
+.btn-continue:hover{background:#15803d}
+.btn-continue:active{transform:scale(.99)}
+.btn-continue:disabled{background:#9ca3af;cursor:not-allowed}
+
+.name-field{border:1.5px solid #e5e7eb;border-radius:12px;padding:14px 16px;font-family:'Inter',sans-serif;font-size:16px;color:#030712;width:100%;outline:none;margin-bottom:12px;transition:border-color .15s}
+.name-field:focus{border-color:#030712}
+
+/* depoimento */
+.testi-img-wrap{width:100%;max-width:260px;margin:0 auto 20px;aspect-ratio:9/16;border-radius:16px;overflow:hidden;background:#f1f1f1;border:1px solid #e5e7eb}
+.testi-img-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.testi-img-fallback{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px;text-align:center}
+
+/* diagnóstico (loading) */
+.diag-screen{display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px 0;text-align:center}
+.diag-screen.active{display:flex}
+.diag-ring{width:72px;height:72px;border-radius:50%;border:3px solid #e5e7eb;border-top-color:#030712;animation:spin .8s linear infinite;margin-bottom:24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.diag-title{font-size:18px;font-weight:700;margin-bottom:8px}
+.diag-list{display:flex;flex-direction:column;gap:10px;text-align:left;margin-top:20px;width:100%}
+.diag-item{font-size:14px;color:#9ca3af;padding-left:28px;position:relative;transition:color .3s}
+.diag-item::before{content:'○';position:absolute;left:0;color:#d1d5db;transition:all .3s}
+.diag-item.done{color:#030712}
+.diag-item.done::before{content:'✓';color:#16a34a}
+
+/* ═══ RELATÓRIO ═══════════════════════════════════════════════ */
+.rep-badge{display:inline-flex;align-items:center;gap:6px;align-self:center;background:#f1f1f1;border-radius:99px;padding:6px 14px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6b7280;margin-bottom:14px}
+.rep-h1{font-size:15px;font-weight:600;color:#6b7280;text-align:center;margin-bottom:2px}
+.rep-loop{font-size:28px;font-weight:900;text-align:center;line-height:1.15;margin-bottom:10px}
+.rep-resumo{font-size:15px;line-height:1.55;text-align:center;color:#374151;margin-bottom:24px}
+
+/* medidor de intensidade */
+.gauge{border:1.5px solid #e5e7eb;border-radius:14px;padding:16px;margin-bottom:24px}
+.gauge-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.gauge-lab{font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em}
+.gauge-val{font-size:13px;font-weight:800}
+.gauge-track{height:10px;background:#f1f1f1;border-radius:99px;overflow:hidden;margin-bottom:10px}
+.gauge-fill{height:100%;border-radius:99px;width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.gauge-txt{font-size:13px;line-height:1.5;color:#374151}
+
+/* seções */
+.rep-sec{margin-bottom:26px}
+.rep-sec-t{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f1f1f1}
+.rep-p{font-size:15px;line-height:1.65;color:#1f2937;margin-bottom:12px}
+.rep-p strong{font-weight:700;color:#030712}
+
+/* espelho das respostas */
+.mirror{display:flex;flex-direction:column;gap:10px}
+.mirror-item{background:#f9fafb;border-left:3px solid #030712;border-radius:0 10px 10px 0;padding:11px 14px}
+.mirror-q{font-size:11px;color:#9ca3af;margin-bottom:3px;line-height:1.35}
+.mirror-a{font-size:14px;font-weight:600;color:#030712;line-height:1.4}
+
+/* mecanismo em estágios */
+.stages{display:flex;flex-direction:column;gap:0;counter-reset:st}
+.stage{position:relative;padding:0 0 18px 34px;border-left:2px solid #e5e7eb;counter-increment:st}
+.stage:last-child{border-left-color:transparent;padding-bottom:0}
+.stage::before{content:counter(st);position:absolute;left:-13px;top:-2px;width:24px;height:24px;border-radius:50%;background:#030712;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.stage p{font-size:14px;line-height:1.5;color:#374151;margin-top:1px}
+
+/* destaque (verdade central) */
+.truth{background:#030712;color:#fff;border-radius:14px;padding:18px;margin-bottom:26px}
+.truth-t{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;margin-bottom:8px}
+.truth p{font-size:15px;line-height:1.6}
+
+/* alerta de custo */
+.cost{background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 16px;margin-bottom:26px}
+.cost p{font-size:14px;line-height:1.55;color:#991b1b}
+
+/* desejos espelhados */
+.wants{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.want{display:flex;gap:9px;align-items:flex-start;font-size:14px;line-height:1.5;color:#1f2937}
+.want::before{content:'✓';color:#16a34a;font-weight:800;flex-shrink:0}
+
+/* depoimento por loop */
+.depo{border:1.5px solid #e5e7eb;border-radius:14px;overflow:hidden;background:#fff}
+.depo img{width:100%;display:block}
+.depo-cap{font-size:13px;line-height:1.5;color:#374151;padding:12px 14px 0;font-weight:600}
+.depo-nota{font-size:11px;color:#9ca3af;padding:6px 14px 12px}
+
+/* ponte pra VSL */
+.bridge{border:1.5px dashed #d1d5db;border-radius:14px;padding:18px;text-align:center;margin-bottom:20px}
+.bridge p{font-size:15px;line-height:1.6;color:#1f2937}
+.bridge strong{font-weight:800}
+
+.btn-cta{width:100%;padding:17px;background:#16a34a;color:#fff;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;cursor:pointer;transition:background .15s,transform .1s;text-decoration:none;display:block;text-align:center}
+.btn-cta:hover{background:#15803d}
+.btn-cta:active{transform:scale(.99)}
+
+.quiz-footer{padding:20px 0 28px;text-align:center;font-size:11px;color:#d1d5db;border-top:1px solid #f1f1f1;margin-top:auto}
+.legal{font-size:10px;line-height:1.6;color:#9ca3af;text-align:left;max-width:448px;margin:0 auto}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.screen.active,.diag-screen.active{animation:fadeUp .3s ease}
+.reveal{opacity:0;animation:fadeUp .5s ease forwards}
+</style>
+</head>
+<body>
+
+<div class="quiz-shell">
+
+  <div class="top-bar" id="top-bar">
+    <button class="back-btn" id="back-btn" aria-label="Voltar" style="visibility:hidden">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div></div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="screen active" id="screen-intro">
+    <h1 class="intro-title">Descubra Qual é o<br><span class="hl">Loop da Desconexão</span><br>no Seu Relacionamento</h1>
+    <p class="intro-sub">Responda 9 perguntas e receba um relatório do padrão que está se repetindo entre vocês</p>
+    <div class="intro-img">
+      <img src="midias/intro-quiz.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+      <div class="intro-img-fallback" style="display:none">❤️</div>
+    </div>
+    <button class="btn-cta" id="btn-start">COMEÇAR DIAGNÓSTICO →</button>
+    <p class="intro-proof">⚡ Mais de 3.200 casais já identificaram seu Loop</p>
+  </div>
+
+  <!-- NOME -->
+  <div class="screen" id="screen-name">
+    <div class="q-wrap">
+      <h2 class="q-title">Antes de começar, qual é o seu primeiro nome?</h2>
+      <p class="q-hint">Seu relatório será escrito para você</p>
+      <input type="text" class="name-field" id="name-input" placeholder="Digite seu primeiro nome" autocomplete="given-name"/>
+      <button class="btn-continue" id="btn-name-continue">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- PERGUNTA (render dinâmico) -->
+  <div class="screen" id="screen-q">
+    <div class="q-wrap">
+      <h2 class="q-title" id="q-title"></h2>
+      <p class="q-hint" id="q-hint" style="display:none"></p>
+      <div class="options" id="q-options"></div>
+      <button class="btn-continue" id="btn-multi" style="display:none" disabled>Ver meu relatório →</button>
+    </div>
+  </div>
+
+  <!-- DEPOIMENTO -->
+  <div class="screen" id="screen-testi">
+    <div class="q-wrap" style="align-items:center">
+      <h2 class="q-title">Outros casais reconheceram <span class="hl">esse mesmo padrão</span></h2>
+      <div class="testi-img-wrap" style="margin:20px auto">
+        <img src="midias/quiz-depoimento-1.jpg" alt="Depoimento" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <div class="testi-img-fallback" style="display:none"><span style="font-size:2.5rem">📱</span><p style="font-size:11px;color:#9ca3af">Adicione um print em<br><code>midias/quiz-depoimento-1.jpg</code></p></div>
+      </div>
+      <button class="btn-continue" id="btn-testi">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="diag-screen" id="screen-diag">
+    <div class="diag-ring"></div>
+    <p class="diag-title" id="diag-greeting">Analisando suas respostas...</p>
+    <p style="font-size:14px;color:#6b7280">Montando seu relatório</p>
+    <div class="diag-list">
+      <p class="diag-item" data-delay="0">Cruzando suas respostas</p>
+      <p class="diag-item" data-delay="1100">Identificando o padrão dominante</p>
+      <p class="diag-item" data-delay="2300">Medindo o nível de instalação</p>
+      <p class="diag-item" data-delay="3500">Relatório pronto</p>
+    </div>
+  </div>
+
+  <!-- RELATÓRIO -->
+  <div class="screen" id="screen-report">
+    <div id="report-body"></div>
+    <a href="vsl.html" class="btn-cta" id="btn-to-vsl">VER COMO QUEBRAR ESSE PADRÃO →</a>
+  </div>
+
+  <div class="quiz-footer">
+    <p class="legal">ESTE SITE NÃO É do FACEBOOK: Este site não faz parte do site do Facebook ou do Facebook Inc. Além disso, este site NÃO é endossado pelo Facebook de nenhuma maneira. FACEBOOK é uma marca comercial independente da FACEBOOK, Inc.. Usamos pixels / cookies de remarketing do Google neste site para nos comunicarmos novamente com as pessoas que visitam nosso site e garantir que possamos alcançá-las no futuro com mensagens e informações relevantes. O Google mostra nossos anúncios em sites de terceiros na Internet para ajudar a comunicar nossa mensagem e alcançar as pessoas certas que mostraram interesse em nossas informações no passado.</p>
+    <p style="margin-top:12px">© 2025 RECONECTAR</p>
+  </div>
+</div>
+
+<script src="motor.js"></script>
+<script>
+(function(){
+'use strict';
+const M = window.MotorQuiz;
+
+let estado = M.criarEstado();
+let idx = 0;                     // índice da pergunta atual
+let historico = [];              // pilha de {tela, idx, snapshot}
+let telaAtual = 'screen-intro';
+const TOTAL = M.totalPerguntas();
+const POS_DEPOIMENTO = 4;        // depoimento após a 4ª pergunta
+
+const $ = id => document.getElementById(id);
+const progressFill = $('progress-fill'), backBtn = $('back-btn'), topBar = $('top-bar');
+
+/* ─── navegação ─────────────────────────────────────────────── */
+function mostrar(tela){
+  const cur = $(telaAtual); if(cur) cur.classList.remove('active');
+  const nxt = $(tela); if(nxt) nxt.classList.add('active');
+  telaAtual = tela;
+  atualizarBarra(); atualizarVoltar(); window.scrollTo(0,0);
+}
+function atualizarBarra(){
+  let pct = 0;
+  if(telaAtual === 'screen-intro') pct = 0;
+  else if(telaAtual === 'screen-name') pct = 6;
+  else if(telaAtual === 'screen-q') pct = 6 + (idx / TOTAL) * 88;
+  else if(telaAtual === 'screen-testi') pct = 6 + (POS_DEPOIMENTO / TOTAL) * 88;
+  else pct = 100;
+  progressFill.style.width = pct + '%';
+}
+function atualizarVoltar(){
+  const esconder = ['screen-intro','screen-report','screen-diag'];
+  backBtn.style.visibility = esconder.includes(telaAtual) ? 'hidden' : 'visible';
+  topBar.style.display = telaAtual === 'screen-report' ? 'none' : '';
+}
+
+/* snapshot para o botão voltar não bagunçar o score */
+function snap(){ return JSON.parse(JSON.stringify({respostas:estado.respostas, score:estado.score, ramo:estado.ramo})); }
+function restaurar(s){ estado.respostas = s.respostas; estado.score = s.score; estado.ramo = s.ramo; }
+
+backBtn.addEventListener('click', () => {
+  if(!historico.length) return;
+  const h = historico.pop();
+  restaurar(h.snapshot); idx = h.idx;
+  if(h.tela === 'screen-q') renderPergunta(false); else mostrar(h.tela);
+});
+
+/* ─── fluxo ─────────────────────────────────────────────────── */
+$('btn-start').addEventListener('click', () => {
+  historico.push({tela:'screen-intro', idx, snapshot:snap()});
+  mostrar('screen-name');
+});
+
+$('btn-name-continue').addEventListener('click', () => {
+  estado.nome = $('name-input').value.trim();
+  sessionStorage.setItem('recon_name', estado.nome);
+  historico.push({tela:'screen-name', idx, snapshot:snap()});
+  renderPergunta();
+});
+$('name-input').addEventListener('keydown', e => { if(e.key === 'Enter') $('btn-name-continue').click(); });
+
+$('btn-testi').addEventListener('click', () => {
+  historico.push({tela:'screen-testi', idx, snapshot:snap()});
+  renderPergunta();
+});
+
+/* ─── render de pergunta ────────────────────────────────────── */
+function renderPergunta(empilhar){
+  const p = M.proximaPergunta(estado, idx);
+  if(!p){ iniciarDiagnostico(); return; }
+
+  $('q-title').textContent = p.titulo;
+  const hint = $('q-hint');
+  if(p.hint){ hint.textContent = p.hint; hint.style.display = ''; } else hint.style.display = 'none';
+
+  const cont = $('q-options');
+  cont.innerHTML = '';
+  cont.className = 'options' + (p.tipo === 'multi' ? ' opts-multi' : '');
+  const btnMulti = $('btn-multi');
+  btnMulti.style.display = p.tipo === 'multi' ? '' : 'none';
+  btnMulti.disabled = true;
+
+  p.opcoes.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    if(p.tipo === 'multi'){
+      b.innerHTML = '<span class="opt-check"></span><span>' + o.txt + '</span>';
+      b.addEventListener('click', () => {
+        b.classList.toggle('selected');
+        btnMulti.disabled = cont.querySelectorAll('.opt.selected').length === 0;
+      });
+    } else {
+      const ic = o.emoji
+        ? '<span class="opt-emoji">' + o.emoji + '</span>'
+        : '<span class="opt-letter">' + 'ABCDEFGH'[i] + '</span>';
+      b.innerHTML = ic + '<span>' + o.txt + '</span>';
+      b.addEventListener('click', () => {
+        cont.querySelectorAll('.opt').forEach(s => s.classList.remove('selected'));
+        b.classList.add('selected');
+        setTimeout(() => avancar(p, o), 220);
+      });
+    }
+    cont.appendChild(b);
+  });
+
+  btnMulti.onclick = () => {
+    const sel = [...cont.querySelectorAll('.opt.selected')].map(el => {
+      const t = el.querySelector('span:last-child').textContent;
+      return (p.opcoes.find(o => o.txt === t) || {}).val;
+    }).filter(Boolean);
+    estado.respostas[p.id] = { pergunta: p.titulo, txt: sel.join(', '), val: sel };
+    idx++;
+    iniciarDiagnostico();
+  };
+
+  if(empilhar !== false && telaAtual === 'screen-q'){
+    historico.push({tela:'screen-q', idx, snapshot:snap()});
+  }
+  mostrar('screen-q');
+}
+
+function avancar(pergunta, opcao){
+  historico.push({tela:'screen-q', idx, snapshot:snap()});
+  M.pontuar(estado, pergunta, opcao);
+  idx++;
+  if(idx === POS_DEPOIMENTO){ mostrar('screen-testi'); return; }
+  renderPergunta(false);
+}
+
+/* ─── diagnóstico ───────────────────────────────────────────── */
+function iniciarDiagnostico(){
+  const cur = $(telaAtual); if(cur) cur.classList.remove('active');
+  const d = $('screen-diag'); d.classList.add('active');
+  telaAtual = 'screen-diag'; atualizarBarra(); atualizarVoltar(); window.scrollTo(0,0);
+
+  if(estado.nome) $('diag-greeting').textContent = 'Obrigado, ' + estado.nome + '. Analisando suas respostas...';
+  d.querySelectorAll('.diag-item').forEach(it => {
+    setTimeout(() => it.classList.add('done'), parseInt(it.dataset.delay) || 0);
+  });
+
+  setTimeout(() => { d.classList.remove('active'); renderRelatorio(); }, 4600);
+}
+
+/* ─── relatório ─────────────────────────────────────────────── */
+function renderRelatorio(){
+  const R = M.gerarRelatorio(estado);
+  const nome = R.nome ? R.nome + ',' : '';
+  const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+  let h = '';
+
+  h += '<div style="display:flex;flex-direction:column"><span class="rep-badge">Relatório personalizado</span></div>';
+  h += '<p class="rep-h1">' + esc(nome) + ' o padrão que se repete entre vocês é o</p>';
+  h += '<h1 class="rep-loop">' + esc(R.loop.nome) + '</h1>';
+  h += '<p class="rep-resumo">' + esc(R.loop.resumo) + '</p>';
+
+  /* medidor */
+  h += '<div class="gauge">'
+     +   '<div class="gauge-top"><span class="gauge-lab">Nível de instalação</span>'
+     +   '<span class="gauge-val" style="color:' + R.inten.cor + '">' + R.inten.rot + '</span></div>'
+     +   '<div class="gauge-track"><div class="gauge-fill" id="gauge-fill" style="background:' + R.inten.cor + '"></div></div>'
+     +   '<p class="gauge-txt">' + esc(R.inten.txt) + '</p>'
+     + '</div>';
+
+  /* espelho */
+  if(R.espelho.length){
+    h += '<div class="rep-sec"><p class="rep-sec-t">O que você me contou</p><div class="mirror">';
+    R.espelho.forEach(e => {
+      h += '<div class="mirror-item"><p class="mirror-q">' + esc(e.rot) + '</p><p class="mirror-a">' + esc(e.val) + '</p></div>';
+    });
+    h += '</div></div>';
+  }
+
+  /* mecanismo */
+  h += '<div class="rep-sec"><p class="rep-sec-t">Como esse loop funciona na sua casa</p><div class="stages">';
+  R.loop.mecanismo.forEach(m => { h += '<div class="stage"><p>' + esc(m) + '</p></div>'; });
+  h += '</div></div>';
+
+  /* verdade central */
+  h += '<div class="truth"><p class="truth-t">O que quase ninguém enxerga</p><p>' + esc(R.loop.verdade) + '</p></div>';
+
+  /* por que falhou */
+  if(R.tentativa){
+    h += '<div class="rep-sec"><p class="rep-sec-t">Por que o que você tentou não funcionou</p>'
+       + '<p class="rep-p"><strong>' + esc(R.tentativa.t) + '</strong></p>'
+       + '<p class="rep-p">' + esc(R.tentativa.p) + '</p></div>';
+  }
+
+  /* projeção */
+  if(R.projecao){
+    h += '<div class="rep-sec"><p class="rep-sec-t">Onde isso chega se nada mudar</p>'
+       + '<p class="rep-p">' + esc(R.projecao) + '</p></div>';
+    h += '<div class="cost"><p>' + esc(R.loop.custo) + '</p></div>';
+  }
+
+  /* prova de saída: depoimento de quem estava NESTE mesmo loop —
+     entra logo depois do custo, quando o medo acabou de ser nomeado */
+  if(R.depo){
+    h += '<div class="rep-sec"><p class="rep-sec-t">Quem estava nesse mesmo padrão</p>'
+       + '<div class="depo"><img src="' + R.depo.img + '" alt="Depoimento de cliente" loading="lazy"'
+       + ' onerror="this.closest(\'.depo\').style.display=\'none\'"/>'
+       + '<p class="depo-cap">' + esc(R.depo.legenda) + '</p>'
+       + '<p class="depo-nota">Identidade preservada a pedido da cliente</p>'
+       + '</div></div>';
+  }
+
+  /* desejos espelhados + ponte */
+  h += '<div class="rep-sec"><p class="rep-sec-t">O que falta</p>';
+  h += '<p class="rep-p">Você já sabe o que sente. Depois desse relatório, você também sabe o nome do padrão e como ele roda. Isso é diagnóstico — e diagnóstico sozinho não quebra loop nenhum.</p>';
+  if(R.desejos.length){
+    h += '<p class="rep-p">Você disse que queria:</p><div class="wants">';
+    R.desejos.forEach(d => { h += '<div class="want"><span>' + esc(d) + '</span></div>'; });
+    h += '</div>';
+  }
+  h += '</div>';
+
+  h += '<div class="bridge"><p>O que muda o ' + esc(R.loop.nome) + ' não é entender melhor.<br>É <strong>a sequência exata</strong> que interrompe o padrão no momento em que ele começa a rodar — na cena real, não na teoria.<br><br>É isso que o vídeo a seguir te mostra.</p></div>';
+
+  $('report-body').innerHTML = h;
+
+  const rep = $('screen-report');
+  rep.classList.add('active');
+  telaAtual = 'screen-report';
+  atualizarBarra(); atualizarVoltar(); window.scrollTo(0,0);
+
+  setTimeout(() => { const g = $('gauge-fill'); if(g) g.style.width = R.inten.idx + '%'; }, 250);
+
+  try{
+    sessionStorage.setItem('recon_loop', R.loop.nome);
+    sessionStorage.setItem('recon_idx', R.inten.idx);
+  }catch(e){}
+}
+
+atualizarBarra(); atualizarVoltar();
+})();
+</script>
+</body>
+</html>

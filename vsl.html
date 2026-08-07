@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>RECONECTAR — Seu Diagnóstico Completo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  height:100%;font-family:'Inter',system-ui,sans-serif;
+  background:#fff;color:#030712;-webkit-font-smoothing:antialiased;
+}
+
+.page{
+  display:flex;flex-direction:column;align-items:center;
+  min-height:100svh;padding:0 16px 40px;
+}
+
+/* ── HEADLINE ─────────────────────────────────────────────── */
+.headline-wrap{
+  width:100%;max-width:448px;
+  padding:24px 0 16px;text-align:center;
+}
+.eyebrow{
+  font-size:12px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:#6b7280;margin-bottom:10px;
+}
+.headline{
+  font-size:22px;font-weight:800;line-height:1.25;
+  color:#030712;margin-bottom:8px;
+}
+.headline .hl{
+  background:#16a34a;color:#fff;
+  padding:1px 5px;border-radius:4px;
+}
+.sub{font-size:14px;color:#6b7280;line-height:1.55}
+
+/* ── VSL BOX ──────────────────────────────────────────────── */
+.vsl-outer{
+  width:100%;max-width:448px;
+  display:flex;flex-direction:column;align-items:center;
+}
+
+.vsl-box{
+  position:relative;
+  /* Altura = viewport menos headline (~160px) e CTA (~120px) e padding */
+  height:calc(100svh - 330px);
+  min-height:300px;
+  max-height:calc(448px * 16 / 9);
+  /* Largura derivada da proporção 9:16 */
+  width:calc((100svh - 330px) * 9 / 16);
+  max-width:min(100%, calc(448px));
+  margin:0 auto;
+  background:#000;
+  border-radius:12px;
+  overflow:hidden;
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+/* Guard — bloqueia arrasto e menu de contexto */
+.vsl-guard{
+  position:absolute;inset:0;z-index:10;background:transparent;
+}
+
+video.vsl-video{
+  width:100%;height:100%;
+  object-fit:cover;display:block;
+  pointer-events:none;
+}
+
+/* ── OVERLAY: ATIVAR SOM (VTurb style) ───────────────────── */
+.sound-overlay{
+  position:absolute;inset:0;z-index:30;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:16px;
+  background:rgba(0,0,0,.55);
+  cursor:pointer;
+  transition:background .2s;
+}
+.sound-overlay:hover{background:rgba(0,0,0,.45)}
+.sound-overlay.hidden{display:none}
+
+/* Ícone de mudo animado */
+.sound-icon{
+  position:relative;
+  width:64px;height:64px;
+}
+.sound-icon__circle{
+  width:64px;height:64px;border-radius:50%;
+  background:rgba(255,255,255,.15);
+  border:2px solid rgba(255,255,255,.4);
+  display:flex;align-items:center;justify-content:center;
+  animation:soundPulse 2s ease-in-out infinite;
+}
+@keyframes soundPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.3)}
+  50%{box-shadow:0 0 0 14px rgba(255,255,255,0)}
+}
+.sound-icon__circle svg{display:block}
+
+.sound-text{
+  text-align:center;
+  font-family:'Inter',sans-serif;
+}
+.sound-text__main{
+  display:block;
+  font-size:15px;font-weight:700;
+  color:#fff;
+  text-shadow:0 1px 4px rgba(0,0,0,.5);
+  margin-bottom:4px;
+}
+.sound-text__sub{
+  display:block;
+  font-size:12px;font-weight:400;
+  color:rgba(255,255,255,.7);
+  text-shadow:0 1px 3px rgba(0,0,0,.4);
+}
+
+/* Botão pill de ativar som */
+.sound-btn{
+  display:flex;align-items:center;gap:8px;
+  background:#fff;
+  color:#030712;
+  border:none;
+  border-radius:999px;
+  padding:12px 24px;
+  font-family:'Inter',sans-serif;
+  font-size:14px;font-weight:700;
+  cursor:pointer;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+  transition:transform .15s,box-shadow .15s;
+  animation:btnBounce 1.5s ease-in-out infinite;
+}
+@keyframes btnBounce{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.04)}
+}
+.sound-btn:hover{
+  transform:scale(1.06)!important;
+  box-shadow:0 6px 28px rgba(0,0,0,.4);
+  animation:none;
+}
+
+/* ── OVERLAY: PAUSED (mostrado ao pausar depois do som ativo) */
+.pause-overlay{
+  position:absolute;inset:0;z-index:28;
+  display:none;
+  align-items:center;justify-content:center;
+  background:rgba(0,0,0,.4);
+  cursor:pointer;
+}
+.pause-overlay.visible{display:flex}
+.pause-circle{
+  width:60px;height:60px;border-radius:50%;
+  background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.5);
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ── BARRA DE PROGRESSO (dentro do vídeo, na base) ─────── */
+.vsl-progress-bar{
+  position:absolute;bottom:0;left:0;right:0;z-index:25;
+  height:4px;background:rgba(255,255,255,.2);
+}
+.vsl-progress-fill{
+  height:100%;background:#ef4444;width:0%;
+  transition:width .5s linear;
+}
+
+/* ── CAPTION ──────────────────────────────────────────────── */
+.vsl-caption{
+  font-size:12px;color:#9ca3af;text-align:center;
+  margin:10px 0 0;max-width:340px;line-height:1.5;
+}
+
+/* ── CTA BLOCK ────────────────────────────────────────────── */
+.cta-block{
+  width:100%;max-width:448px;
+  margin-top:20px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+
+/* Pending */
+.cta-pending{
+  width:100%;padding:16px 20px;
+  background:#f9fafb;border:1.5px solid #e5e7eb;
+  border-radius:12px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  text-align:center;
+}
+.pending-wrap{position:relative;width:44px;height:44px}
+.pending-spin{
+  position:absolute;inset:0;
+  border:2.5px solid #e5e7eb;border-top-color:#030712;
+  border-radius:50%;
+  animation:spin .9s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ring-svg{position:absolute;inset:0;width:100%;height:100%}
+.pending-text{font-size:13px;color:#6b7280}
+.pending-text strong{color:#030712}
+.pending-sub{font-size:11px;color:#9ca3af}
+
+/* Ready */
+.cta-ready{
+  display:none;flex-direction:column;
+  align-items:center;gap:8px;width:100%;
+}
+.cta-ready.visible{
+  display:flex;
+  animation:fadeUp .5s ease;
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.btn-cta{
+  width:100%;padding:17px;
+  background:#16a34a;color:#fff;
+  border:none;border-radius:12px;
+  font-family:'Inter',sans-serif;
+  font-size:15px;font-weight:700;
+  letter-spacing:.02em;text-transform:uppercase;
+  cursor:pointer;text-decoration:none;
+  display:block;text-align:center;
+  animation:ctaPulse 2.5s ease-in-out infinite;
+  transition:background .15s;
+}
+.btn-cta:hover{background:#15803d;animation:none}
+@keyframes ctaPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,.4)}
+  50%{box-shadow:0 0 0 12px rgba(22,163,74,0)}
+}
+
+.cta-seals{
+  display:flex;gap:16px;justify-content:center;flex-wrap:wrap;
+}
+.cta-seals span{font-size:12px;color:#6b7280}
+.vsl-footer{width:100%;max-width:448px;margin:32px auto 0;padding:20px 0 8px;border-top:1px solid #f1f1f1;text-align:center}
+.legal{font-size:10px;line-height:1.6;color:#9ca3af;text-align:left}
+.cta-price{font-size:13px;color:#6b7280}
+.cta-price strong{color:#030712;font-size:15px}
+
+/* ── PRINT PROTECTION ────────────────────────────────────── */
+@media print{
+  .vsl-box,video{display:none!important}
+  body::before{
+    content:'RECONECTAR — Conteúdo Protegido';
+    position:fixed;top:50%;left:50%;
+    transform:translate(-50%,-50%) rotate(-30deg);
+    font-size:2rem;color:rgba(0,0,0,.12);
+    pointer-events:none;white-space:nowrap;
+  }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADLINE -->
+  <div class="headline-wrap">
+    <p class="eyebrow" id="vsl-eyebrow">Diagnóstico concluído</p>
+    <h1 class="headline">
+      <span id="vsl-name-prefix"></span>Seu <span class="hl">Loop da Desconexão</span><br>foi identificado.
+    </h1>
+    <p class="sub">Assista o vídeo abaixo para descobrir o que está repetindo — e como quebrar esse padrão em 30 dias.</p>
+  </div>
+
+  <!-- PLAYER -->
+  <div class="vsl-outer">
+    <div class="vsl-box" id="vsl-box">
+
+      <!-- Guard (bloqueia menu de contexto e drag) -->
+      <div class="vsl-guard" id="vsl-guard"></div>
+
+      <!-- Vídeo -->
+      <video
+        id="vsl-video"
+        class="vsl-video"
+        playsinline
+        muted
+        autoplay
+        loop
+        controlslist="nodownload nofullscreen noremoteplayback"
+        disablePictureInPicture
+        preload="auto"
+      >
+        <!-- Vídeo servido pela própria hospedagem.
+             NÃO adicionar crossorigin="anonymous" aqui: o atributo faz o
+             navegador exigir cabeçalho CORS e aborta o carregamento. Só é
+             necessário se o vídeo for lido por canvas — não é o caso. -->
+        <source src="midias/vsl.mp4" type="video/mp4"/>
+      </video>
+
+      <!-- Overlay: ativar som (VTurb style) -->
+      <div class="sound-overlay" id="sound-overlay">
+        <div class="sound-icon">
+          <div class="sound-icon__circle">
+            <!-- Ícone de mudo -->
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M11 5L6 9H2v6h4l5 4V5z" fill="white"/>
+              <line x1="23" y1="9" x2="17" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              <line x1="17" y1="9" x2="23" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="sound-text">
+          <span class="sound-text__main">🔇 Seu vídeo está sem som</span>
+          <span class="sound-text__sub">Clique para ativar o áudio e assistir do início</span>
+        </div>
+        <button class="sound-btn" id="sound-btn" aria-label="Ativar som">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+          Ativar Som e Assistir
+        </button>
+      </div>
+
+      <!-- Overlay: pausado (após som ativado) -->
+      <div class="pause-overlay" id="pause-overlay">
+        <div class="pause-circle">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="white">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Barra de progresso vermelha na base -->
+      <div class="vsl-progress-bar">
+        <div class="vsl-progress-fill" id="vsl-progress-fill"></div>
+      </div>
+
+    </div>
+    <p class="vsl-caption">⚠️ Assista até o final — é aqui que você descobre o que fazer com o seu Loop</p>
+  </div>
+
+  <!-- CTA BLOCK -->
+  <div class="cta-block">
+
+    <!-- Pending -->
+    <div class="cta-pending" id="cta-pending">
+      <div class="pending-wrap">
+        <div class="pending-spin"></div>
+        <svg class="ring-svg" viewBox="0 0 44 44">
+          <circle cx="22" cy="22" r="18" fill="none" stroke="#e5e7eb" stroke-width="2.5"/>
+          <circle id="ring-circle" cx="22" cy="22" r="18" fill="none"
+            stroke="#030712" stroke-width="2.5"
+            stroke-dasharray="113.1" stroke-dashoffset="113.1"
+            stroke-linecap="round" transform="rotate(-90 22 22)"/>
+        </svg>
+      </div>
+      <p class="pending-text">Botão de acesso em <strong id="cta-clock">8:00</strong></p>
+      <p class="pending-sub">Continue assistindo enquanto aguarda</p>
+    </div>
+
+    <!-- Ready -->
+    <div class="cta-ready" id="cta-ready">
+      <a href="https://pay.kiwify.com.br/8pVPeYi" class="btn-cta" rel="noopener noreferrer">
+        🔓 QUERO QUEBRAR MEU LOOP AGORA →
+      </a>
+      <div class="cta-seals">
+        <span>🔒 Pagamento seguro</span>
+        <span>⚡ Acesso imediato</span>
+        <span>🛡️ Garantia 7 dias</span>
+      </div>
+      <p class="cta-price">Por apenas <strong>R$ 19,00</strong> — pagamento único</p>
+    </div>
+
+  </div>
+
+  <!-- RODAPÉ LEGAL -->
+  <div class="vsl-footer">
+    <p class="legal">ESTE SITE NÃO É do FACEBOOK: Este site não faz parte do site do Facebook ou do Facebook Inc. Além disso, este site NÃO é endossado pelo Facebook de nenhuma maneira. FACEBOOK é uma marca comercial independente da FACEBOOK, Inc.. Usamos pixels / cookies de remarketing do Google neste site para nos comunicarmos novamente com as pessoas que visitam nosso site e garantir que possamos alcançá-las no futuro com mensagens e informações relevantes. O Google mostra nossos anúncios em sites de terceiros na Internet para ajudar a comunicar nossa mensagem e alcançar as pessoas certas que mostraram interesse em nossas informações no passado.</p>
+    <p style="margin-top:12px;font-size:11px;color:#d1d5db">© 2025 RECONECTAR</p>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+(function(){
+'use strict';
+
+// ── Personalização ──────────────────────────────────────────
+const savedName = sessionStorage.getItem('recon_name') || '';
+if(savedName){
+  const prefix  = document.getElementById('vsl-name-prefix');
+  const eyebrow = document.getElementById('vsl-eyebrow');
+  if(prefix)  prefix.textContent  = savedName + ', ';
+  if(eyebrow) eyebrow.textContent = 'Diagnóstico concluído para ' + savedName;
+}
+
+// ── Refs ────────────────────────────────────────────────────
+const video         = document.getElementById('vsl-video');
+const box           = document.getElementById('vsl-box');
+const guard         = document.getElementById('vsl-guard');
+const soundOverlay  = document.getElementById('sound-overlay');
+const soundBtn      = document.getElementById('sound-btn');
+const pauseOverlay  = document.getElementById('pause-overlay');
+const progressFill  = document.getElementById('vsl-progress-fill');
+const ctaPending    = document.getElementById('cta-pending');
+const ctaReady      = document.getElementById('cta-ready');
+const ctaClock      = document.getElementById('cta-clock');
+const ringCircle    = document.getElementById('ring-circle');
+
+if(!video) return;
+
+// ── Estado ──────────────────────────────────────────────────
+let soundActivated = false;
+
+// ── Proteção ────────────────────────────────────────────────
+guard.addEventListener('contextmenu', e => e.preventDefault());
+video.addEventListener('contextmenu',  e => e.preventDefault());
+box.addEventListener('dragstart',      e => e.preventDefault());
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'F12'){ e.preventDefault(); return; }
+  if(e.ctrlKey && ['s','u','p'].includes(e.key.toLowerCase())){ e.preventDefault(); return; }
+  if(e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())){ e.preventDefault(); return; }
+});
+
+// Pausa ao esconder a aba (após som ativado)
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden && soundActivated) video.pause();
+});
+
+// ── Autoplay silencioso ─────────────────────────────────────
+// Os atributos muted + autoplay já estão no HTML.
+// Garantimos que começa mutado:
+video.muted = true;
+
+video.play().catch(() => {
+  // Se autoplay bloqueado pelo browser, aguarda interação
+  soundOverlay.querySelector('.sound-text__sub').textContent =
+    'Clique para iniciar o vídeo com som';
+});
+
+// ── Ativar Som (comportamento VTurb) ────────────────────────
+function activateSound(){
+  soundActivated = true;
+  soundOverlay.classList.add('hidden');
+
+  // Desmuta e reinicia do começo
+  video.muted   = false;
+  video.loop    = false;
+  video.currentTime = 0;
+
+  video.play().catch(() => {});
+}
+
+soundOverlay.addEventListener('click', activateSound);
+soundBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  activateSound();
+});
+
+// ── Pause overlay (após som ativado) ────────────────────────
+pauseOverlay.addEventListener('click', () => {
+  if(video.paused) video.play().catch(()=>{});
+});
+
+video.addEventListener('pause', () => {
+  if(soundActivated) pauseOverlay.classList.add('visible');
+});
+video.addEventListener('play', () => {
+  pauseOverlay.classList.remove('visible');
+});
+
+// ── Barra de progresso ──────────────────────────────────────
+video.addEventListener('timeupdate', () => {
+  if(!video.duration) return;
+  const pct = (video.currentTime / video.duration) * 100;
+  progressFill.style.width = pct + '%';
+});
+
+// ── CTA Delay 8 minutos ─────────────────────────────────────
+const DELAY_MS = 8 * 60 * 1000;
+const CIRCUMF  = 2 * Math.PI * 18; // ~113.1
+const KEY_CTA  = 'recon_cta_end';
+
+function pad(n){ return String(n).padStart(2,'0'); }
+
+function showCTA(){
+  if(ctaPending) ctaPending.style.display = 'none';
+  if(ctaReady){
+    ctaReady.style.display = 'flex';
+    setTimeout(() => ctaReady.classList.add('visible'), 50);
+  }
+}
+
+function startCTA(){
+  let end = parseInt(sessionStorage.getItem(KEY_CTA) || '0');
+  if(!end || end <= Date.now()){
+    end = Date.now() + DELAY_MS;
+    sessionStorage.setItem(KEY_CTA, end);
+  }
+  if(Date.now() >= end){ showCTA(); return; }
+
+  function tick(){
+    const diff = end - Date.now();
+    if(diff <= 0){ showCTA(); return; }
+
+    const m = Math.floor(diff / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    if(ctaClock) ctaClock.textContent = pad(m) + ':' + pad(s);
+
+    if(ringCircle){
+      const pct = (DELAY_MS - diff) / DELAY_MS;
+      ringCircle.style.strokeDashoffset = (CIRCUMF * (1 - pct)).toFixed(2);
+    }
+    setTimeout(tick, 500);
+  }
+  tick();
+}
+
+setTimeout(startCTA, 300);
+
+// ── Countdown bar 15 min (topo fixo) ────────────────────────
+const bar = document.createElement('div');
+bar.style.cssText = `
+  position:fixed;top:0;left:0;right:0;z-index:9999;
+  background:#030712;padding:9px 16px;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  font-family:'Inter',sans-serif;
+`;
+bar.innerHTML = `
+  <span style="font-size:12px;color:rgba(255,255,255,.8)">🔥 Oferta expira em:</span>
+  <div style="display:flex;align-items:center;gap:4px">
+    <div style="background:#1f1f1f;border-radius:6px;padding:4px 10px;min-width:46px;text-align:center">
+      <span id="bar-min" style="font-size:16px;font-weight:800;color:#fff;display:block;line-height:1">15</span>
+      <span style="font-size:9px;color:#6b7280;letter-spacing:.05em">min</span>
+    </div>
+    <span style="color:#6b7280;font-weight:700">:</span>
+    <div style="background:#1f1f1f;border-radius:6px;padding:4px 10px;min-width:46px;text-align:center">
+      <span id="bar-sec" style="font-size:16px;font-weight:800;color:#fff;display:block;line-height:1">00</span>
+      <span style="font-size:9px;color:#6b7280;letter-spacing:.05em">seg</span>
+    </div>
+  </div>
+  <a href="https://pay.kiwify.com.br/8pVPeYi"
+    style="background:#16a34a;color:#fff;font-size:11px;font-weight:700;
+    letter-spacing:.05em;text-transform:uppercase;padding:6px 14px;
+    border-radius:6px;text-decoration:none;white-space:nowrap">
+    Garantir →
+  </a>
+`;
+document.body.insertBefore(bar, document.body.firstChild);
+document.querySelector('.page').style.paddingTop = '52px';
+
+const barMin  = document.getElementById('bar-min');
+const barSec  = document.getElementById('bar-sec');
+const KEY_BAR = 'recon_bar_end';
+
+function startBar(){
+  let end = parseInt(sessionStorage.getItem(KEY_BAR) || '0');
+  if(!end || end <= Date.now()){
+    end = Date.now() + 15 * 60 * 1000;
+    sessionStorage.setItem(KEY_BAR, end);
+  }
+  function tick(){
+    const diff = end - Date.now();
+    if(diff <= 0){
+      barMin.textContent = '00'; barSec.textContent = '00';
+      bar.style.background = '#991b1b'; return;
+    }
+    barMin.textContent = pad(Math.floor(diff / 60000));
+    barSec.textContent = pad(Math.floor((diff % 60000) / 1000));
+    if(diff < 120000) bar.style.background = '#991b1b';
+    setTimeout(tick, 500);
+  }
+  tick();
+}
+startBar();
+
+// ── Print watermark ──────────────────────────────────────────
+const s = document.createElement('style');
+s.textContent = `@media print{video,#vsl-box{display:none!important}body::before{content:'RECONECTAR — Conteúdo Protegido';position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:2rem;color:rgba(0,0,0,.12);pointer-events:none;white-space:nowrap;}}`;
+document.head.appendChild(s);
+
+})();
+</script>
+</body>
+</html>
