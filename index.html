@@ -24,6 +24,27 @@ fbq('track', 'PageView');
 src="https://www.facebook.com/tr?id=1234740952091664&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel Code -->
+<!-- Tracker próprio — first-party, sem dependência de terceiros -->
+<script>
+;(function(){
+  var TRACKER = 'https://SEU_TRACKER.railway.app'; // ← trocar após o deploy
+  function sid(){
+    var s = localStorage.getItem('_qsid');
+    if(!s){ s = 'q' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+             localStorage.setItem('_qsid', s); }
+    return s;
+  }
+  window.qtrack = function(event, props){
+    fetch(TRACKER + '/track', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({sid: sid(), event: event, props: props || {}})
+    }).catch(function(){});
+  };
+  qtrack('PageView');
+})();
+</script>
+<!-- End Tracker -->
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#fff;color:#030712;-webkit-font-smoothing:antialiased}
@@ -349,6 +370,7 @@ backBtn.addEventListener('click', () => {
 $('btn-start').addEventListener('click', () => {
   historico.push({tela:'screen-intro', idx, snapshot:snap()});
   if(typeof fbq !== 'undefined') fbq('trackCustom', 'QuizInicio');
+  if(typeof qtrack !== 'undefined') qtrack('QuizInicio');
   mostrar('screen-name');
 });
 
@@ -417,6 +439,7 @@ function renderPergunta(empilhar){
     historico.push({tela:'screen-q', idx, snapshot:snap()});
   }
   if(typeof fbq !== 'undefined') fbq('trackCustom', 'QuizEtapa', {etapa: idx + 1, pergunta: p.titulo});
+  if(typeof qtrack !== 'undefined') qtrack('QuizEtapa', {etapa: idx + 1});
   mostrar('screen-q');
 }
 
@@ -426,6 +449,7 @@ function avancar(pergunta, opcao){
   idx++;
   if(idx === POS_DEPOIMENTO){
     if(typeof fbq !== 'undefined') fbq('trackCustom', 'QuizDepoimento');
+    if(typeof qtrack !== 'undefined') qtrack('QuizDepoimento');
     mostrar('screen-testi'); return;
   }
   renderPergunta(false);
@@ -552,11 +576,13 @@ function renderRelatorio(){
 
   // Pixel: quiz concluído
   if(typeof fbq !== 'undefined') fbq('track', 'Lead');
+  if(typeof qtrack !== 'undefined') qtrack('Lead');
 
   // Pixel: clique no checkout
   const btnComprar = $('report-body').querySelector('.btn-comprar');
   if(btnComprar) btnComprar.addEventListener('click', function(){
     if(typeof fbq !== 'undefined') fbq('track', 'InitiateCheckout');
+    if(typeof qtrack !== 'undefined') qtrack('InitiateCheckout');
   });
 
   const rep = $('screen-report');
