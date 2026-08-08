@@ -85,7 +85,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#fff;c
 .rep-loop{font-size:28px;font-weight:900;text-align:center;line-height:1.15;margin-bottom:10px}
 .rep-resumo{font-size:15px;line-height:1.55;text-align:center;color:#374151;margin-bottom:24px}
 
-/* medidor de intensidade */
+/* medidor */
 .gauge{border:1.5px solid #e5e7eb;border-radius:14px;padding:16px;margin-bottom:24px}
 .gauge-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
 .gauge-lab{font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em}
@@ -100,50 +100,103 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#fff;c
 .rep-p{font-size:15px;line-height:1.65;color:#1f2937;margin-bottom:12px}
 .rep-p strong{font-weight:700;color:#030712}
 
-/* espelho das respostas */
+/* espelho */
 .mirror{display:flex;flex-direction:column;gap:10px}
 .mirror-item{background:#f9fafb;border-left:3px solid #030712;border-radius:0 10px 10px 0;padding:11px 14px}
 .mirror-q{font-size:11px;color:#9ca3af;margin-bottom:3px;line-height:1.35}
 .mirror-a{font-size:14px;font-weight:600;color:#030712;line-height:1.4}
 
-/* mecanismo em estágios */
+/* mecanismo */
 .stages{display:flex;flex-direction:column;gap:0;counter-reset:st}
 .stage{position:relative;padding:0 0 18px 34px;border-left:2px solid #e5e7eb;counter-increment:st}
 .stage:last-child{border-left-color:transparent;padding-bottom:0}
 .stage::before{content:counter(st);position:absolute;left:-13px;top:-2px;width:24px;height:24px;border-radius:50%;background:#030712;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
 .stage p{font-size:14px;line-height:1.5;color:#374151;margin-top:1px}
 
-/* destaque (verdade central) */
+/* verdade central */
 .truth{background:#030712;color:#fff;border-radius:14px;padding:18px;margin-bottom:26px}
 .truth-t{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;margin-bottom:8px}
 .truth p{font-size:15px;line-height:1.6}
 
-/* alerta de custo */
+/* custo */
 .cost{background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 16px;margin-bottom:26px}
 .cost p{font-size:14px;line-height:1.55;color:#991b1b}
 
-/* desejos espelhados */
+/* desejos */
 .wants{display:flex;flex-direction:column;gap:8px;margin-top:4px}
 .want{display:flex;gap:9px;align-items:flex-start;font-size:14px;line-height:1.5;color:#1f2937}
 .want::before{content:'✓';color:#16a34a;font-weight:800;flex-shrink:0}
 
-/* depoimento por loop */
+/* depoimento */
 .depo{border:1.5px solid #e5e7eb;border-radius:14px;overflow:hidden;background:#fff}
 .depo img{width:100%;display:block}
 .depo-cap{font-size:13px;line-height:1.5;color:#374151;padding:12px 14px 0;font-weight:600}
 .depo-nota{font-size:11px;color:#9ca3af;padding:6px 14px 12px}
 
-/* ponte pra VSL */
-.bridge{border:1.5px dashed #d1d5db;border-radius:14px;padding:18px;text-align:center;margin-bottom:20px}
-.bridge p{font-size:15px;line-height:1.6;color:#1f2937}
-.bridge strong{font-weight:800}
+/* ═══ BLOCO DE CONVERSÃO ══════════════════════════════════════ */
+.conv-block{margin-top:8px;margin-bottom:32px}
 
-.btn-cta{width:100%;padding:17px;background:#16a34a;color:#fff;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;cursor:pointer;transition:background .15s,transform .1s;text-decoration:none;display:block;text-align:center}
-.btn-cta:hover{background:#15803d}
-.btn-cta:active{transform:scale(.99)}
+.conv-divisor{height:1px;background:linear-gradient(to right,transparent,#e5e7eb,transparent);margin:32px 0 28px}
 
+.conv-pretitulo{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#16a34a;text-align:center;margin-bottom:10px}
+
+.conv-h2{font-size:20px;font-weight:800;line-height:1.3;text-align:center;color:#030712;margin-bottom:14px}
+
+.conv-desc{font-size:15px;line-height:1.65;color:#374151;margin-bottom:22px}
+
+.conv-items{display:flex;flex-direction:column;gap:11px;margin-bottom:28px}
+.conv-item{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.5;color:#1f2937}
+.conv-check{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#16a34a;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+
+/* preço */
+.conv-price-block{text-align:center;margin-bottom:22px;padding:20px 16px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:16px}
+.conv-price-label{font-size:12px;font-weight:600;color:#15803d;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.conv-price-val{font-size:40px;font-weight:900;color:#14532d;line-height:1;margin-bottom:4px}
+.conv-price-note{font-size:12px;color:#16a34a;font-weight:500}
+
+/* botão comprar */
+.btn-comprar{
+  display:block;
+  width:100%;
+  padding:19px 24px;
+  background:#16a34a;
+  color:#fff;
+  border:none;
+  border-radius:14px;
+  font-family:'Inter',sans-serif;
+  font-size:16px;
+  font-weight:900;
+  letter-spacing:.03em;
+  cursor:pointer;
+  text-decoration:none;
+  text-align:center;
+  box-shadow:0 6px 24px rgba(22,163,74,.35);
+  animation:pulse-btn 2.4s ease-in-out infinite;
+  transition:transform .1s,box-shadow .15s;
+  margin-bottom:16px;
+}
+.btn-comprar:hover{
+  background:#15803d;
+  box-shadow:0 8px 30px rgba(22,163,74,.45);
+  transform:translateY(-1px);
+}
+.btn-comprar:active{transform:scale(.98);box-shadow:0 4px 16px rgba(22,163,74,.25)}
+@keyframes pulse-btn{
+  0%,100%{box-shadow:0 6px 24px rgba(22,163,74,.35)}
+  50%{box-shadow:0 6px 32px rgba(22,163,74,.55)}
+}
+
+/* selos de confiança */
+.conv-trust{display:flex;gap:10px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+.trust-badge{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#374151;background:#f9fafb;border:1px solid #e5e7eb;border-radius:99px;padding:6px 12px}
+
+/* garantia */
+.conv-garantia{font-size:12px;line-height:1.6;color:#6b7280;text-align:center;padding:0 8px}
+
+/* footer */
 .quiz-footer{padding:20px 0 28px;text-align:center;font-size:11px;color:#d1d5db;border-top:1px solid #f1f1f1;margin-top:auto}
 .legal{font-size:10px;line-height:1.6;color:#9ca3af;text-align:left;max-width:448px;margin:0 auto}
+
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .screen.active,.diag-screen.active{animation:fadeUp .3s ease}
 .reveal{opacity:0;animation:fadeUp .5s ease forwards}
@@ -169,7 +222,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#fff;c
       <img src="midias/intro-quiz.jpg" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
       <div class="intro-img-fallback" style="display:none">❤️</div>
     </div>
-    <button class="btn-cta" id="btn-start">COMEÇAR DIAGNÓSTICO →</button>
+    <button class="btn-comprar" id="btn-start">COMEÇAR DIAGNÓSTICO GRATUITO →</button>
     <p class="intro-proof">⚡ Mais de 3.200 casais já identificaram seu Loop</p>
   </div>
 
@@ -221,7 +274,6 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#fff;c
   <!-- RELATÓRIO -->
   <div class="screen" id="screen-report">
     <div id="report-body"></div>
-    <a href="vsl.html" class="btn-cta" id="btn-to-vsl">VER COMO QUEBRAR ESSE PADRÃO →</a>
   </div>
 
   <div class="quiz-footer">
@@ -237,16 +289,15 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#fff;c
 const M = window.MotorQuiz;
 
 let estado = M.criarEstado();
-let idx = 0;                     // índice da pergunta atual
-let historico = [];              // pilha de {tela, idx, snapshot}
+let idx = 0;
+let historico = [];
 let telaAtual = 'screen-intro';
 const TOTAL = M.totalPerguntas();
-const POS_DEPOIMENTO = 4;        // depoimento após a 4ª pergunta
+const POS_DEPOIMENTO = 4;
 
 const $ = id => document.getElementById(id);
 const progressFill = $('progress-fill'), backBtn = $('back-btn'), topBar = $('top-bar');
 
-/* ─── navegação ─────────────────────────────────────────────── */
 function mostrar(tela){
   const cur = $(telaAtual); if(cur) cur.classList.remove('active');
   const nxt = $(tela); if(nxt) nxt.classList.add('active');
@@ -268,7 +319,6 @@ function atualizarVoltar(){
   topBar.style.display = telaAtual === 'screen-report' ? 'none' : '';
 }
 
-/* snapshot para o botão voltar não bagunçar o score */
 function snap(){ return JSON.parse(JSON.stringify({respostas:estado.respostas, score:estado.score, ramo:estado.ramo})); }
 function restaurar(s){ estado.respostas = s.respostas; estado.score = s.score; estado.ramo = s.ramo; }
 
@@ -279,7 +329,6 @@ backBtn.addEventListener('click', () => {
   if(h.tela === 'screen-q') renderPergunta(false); else mostrar(h.tela);
 });
 
-/* ─── fluxo ─────────────────────────────────────────────────── */
 $('btn-start').addEventListener('click', () => {
   historico.push({tela:'screen-intro', idx, snapshot:snap()});
   mostrar('screen-name');
@@ -298,7 +347,6 @@ $('btn-testi').addEventListener('click', () => {
   renderPergunta();
 });
 
-/* ─── render de pergunta ────────────────────────────────────── */
 function renderPergunta(empilhar){
   const p = M.proximaPergunta(estado, idx);
   if(!p){ iniciarDiagnostico(); return; }
@@ -361,7 +409,6 @@ function avancar(pergunta, opcao){
   renderPergunta(false);
 }
 
-/* ─── diagnóstico ───────────────────────────────────────────── */
 function iniciarDiagnostico(){
   const cur = $(telaAtual); if(cur) cur.classList.remove('active');
   const d = $('screen-diag'); d.classList.add('active');
@@ -375,17 +422,17 @@ function iniciarDiagnostico(){
   setTimeout(() => { d.classList.remove('active'); renderRelatorio(); }, 4600);
 }
 
-/* ─── relatório ─────────────────────────────────────────────── */
 function renderRelatorio(){
   const R = M.gerarRelatorio(estado);
   const nome = R.nome ? R.nome + ',' : '';
   const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const loopNome = R.loop.nome;
 
   let h = '';
 
   h += '<div style="display:flex;flex-direction:column"><span class="rep-badge">Relatório personalizado</span></div>';
   h += '<p class="rep-h1">' + esc(nome) + ' o padrão que se repete entre vocês é o</p>';
-  h += '<h1 class="rep-loop">' + esc(R.loop.nome) + '</h1>';
+  h += '<h1 class="rep-loop">' + esc(loopNome) + '</h1>';
   h += '<p class="rep-resumo">' + esc(R.loop.resumo) + '</p>';
 
   /* medidor */
@@ -420,15 +467,14 @@ function renderRelatorio(){
        + '<p class="rep-p">' + esc(R.tentativa.p) + '</p></div>';
   }
 
-  /* projeção */
+  /* projeção + custo */
   if(R.projecao){
     h += '<div class="rep-sec"><p class="rep-sec-t">Onde isso chega se nada mudar</p>'
        + '<p class="rep-p">' + esc(R.projecao) + '</p></div>';
     h += '<div class="cost"><p>' + esc(R.loop.custo) + '</p></div>';
   }
 
-  /* prova de saída: depoimento de quem estava NESTE mesmo loop —
-     entra logo depois do custo, quando o medo acabou de ser nomeado */
+  /* depoimento */
   if(R.depo){
     h += '<div class="rep-sec"><p class="rep-sec-t">Quem estava nesse mesmo padrão</p>'
        + '<div class="depo"><img src="' + R.depo.img + '" alt="Depoimento de cliente" loading="lazy"'
@@ -438,17 +484,47 @@ function renderRelatorio(){
        + '</div></div>';
   }
 
-  /* desejos espelhados + ponte */
-  h += '<div class="rep-sec"><p class="rep-sec-t">O que falta</p>';
-  h += '<p class="rep-p">Você já sabe o que sente. Depois desse relatório, você também sabe o nome do padrão e como ele roda. Isso é diagnóstico — e diagnóstico sozinho não quebra loop nenhum.</p>';
+  /* desejos espelhados */
   if(R.desejos.length){
-    h += '<p class="rep-p">Você disse que queria:</p><div class="wants">';
+    h += '<div class="rep-sec"><p class="rep-sec-t">O que você disse que queria</p>';
+    h += '<div class="wants">';
     R.desejos.forEach(d => { h += '<div class="want"><span>' + esc(d) + '</span></div>'; });
-    h += '</div>';
+    h += '</div></div>';
   }
+
+  /* ═══ BLOCO DE CONVERSÃO ═══ */
+  h += '<div class="conv-block">';
+  h += '<div class="conv-divisor"></div>';
+
+  h += '<p class="conv-pretitulo">O próximo passo</p>';
+  h += '<h2 class="conv-h2">Você identificou o padrão. Agora existe uma sequência para interrompê-lo.</h2>';
+  h += '<p class="conv-desc">O Guia Reconectar foi construído para esse momento: depois que você sabe o nome do que acontece, ele te dá o passo a passo para mudar o rumo — aplicado ao <strong>' + esc(loopNome) + '</strong>, não a um casal genérico.</p>';
+
+  h += '<div class="conv-items">';
+  h += '<div class="conv-item"><span class="conv-check">✓</span><span>Como interromper o ' + esc(loopNome) + ' antes que ele se reinicie</span></div>';
+  h += '<div class="conv-item"><span class="conv-check">✓</span><span>O que dizer — e o que <em>não</em> dizer — nas cenas que mais disparam o padrão</span></div>';
+  h += '<div class="conv-item"><span class="conv-check">✓</span><span>Como criar uma abertura real sem acionar a defensiva do outro</span></div>';
+  h += '<div class="conv-item"><span class="conv-check">✓</span><span>O que fazer esta semana — não "quando os dois estiverem prontos"</span></div>';
   h += '</div>';
 
-  h += '<div class="bridge"><p>O que muda o ' + esc(R.loop.nome) + ' não é entender melhor.<br>É <strong>a sequência exata</strong> que interrompe o padrão no momento em que ele começa a rodar — na cena real, não na teoria.<br><br>É isso que o vídeo a seguir te mostra.</p></div>';
+  h += '<div class="conv-price-block">';
+  h += '<p class="conv-price-label">Acesso completo por apenas</p>';
+  h += '<p class="conv-price-val">R$&nbsp;19,00</p>';
+  h += '<p class="conv-price-note">pagamento único · acesso imediato</p>';
+  h += '</div>';
+
+  h += '<a href="https://pay.kiwify.com.br/8pVPeYi" class="btn-comprar">';
+  h += 'QUERO QUEBRAR O ' + esc(loopNome.toUpperCase()) + ' →';
+  h += '</a>';
+
+  h += '<div class="conv-trust">';
+  h += '<span class="trust-badge">🔒 Pagamento 100% seguro</span>';
+  h += '<span class="trust-badge">✅ Garantia de 7 dias</span>';
+  h += '</div>';
+
+  h += '<p class="conv-garantia">Se em 7 dias você não sentir que faz sentido pro seu caso, devolvemos 100% do valor — sem precisar explicar nada.</p>';
+
+  h += '</div>'; /* /conv-block */
 
   $('report-body').innerHTML = h;
 
