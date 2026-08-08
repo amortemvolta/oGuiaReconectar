@@ -348,6 +348,7 @@ backBtn.addEventListener('click', () => {
 
 $('btn-start').addEventListener('click', () => {
   historico.push({tela:'screen-intro', idx, snapshot:snap()});
+  if(typeof fbq !== 'undefined') fbq('trackCustom', 'QuizInicio');
   mostrar('screen-name');
 });
 
@@ -415,6 +416,7 @@ function renderPergunta(empilhar){
   if(empilhar !== false && telaAtual === 'screen-q'){
     historico.push({tela:'screen-q', idx, snapshot:snap()});
   }
+  if(typeof fbq !== 'undefined') fbq('trackCustom', 'QuizEtapa', {etapa: idx + 1, pergunta: p.titulo});
   mostrar('screen-q');
 }
 
@@ -422,7 +424,10 @@ function avancar(pergunta, opcao){
   historico.push({tela:'screen-q', idx, snapshot:snap()});
   M.pontuar(estado, pergunta, opcao);
   idx++;
-  if(idx === POS_DEPOIMENTO){ mostrar('screen-testi'); return; }
+  if(idx === POS_DEPOIMENTO){
+    if(typeof fbq !== 'undefined') fbq('trackCustom', 'QuizDepoimento');
+    mostrar('screen-testi'); return;
+  }
   renderPergunta(false);
 }
 
