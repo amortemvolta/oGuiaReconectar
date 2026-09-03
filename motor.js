@@ -66,17 +66,6 @@ const LOOPS = {
 /* ─── Perguntas base ──────────────────────────────────────────── */
 const BASE = [
   {
-    id: 'q1',
-    titulo: 'Há quanto tempo vocês estão juntos?',
-    tipo: 'letra',
-    opcoes: [
-      { txt: 'Menos de 2 anos',   val: '<2',   w: {} },
-      { txt: 'Entre 2 e 5 anos',  val: '2-5',  w: {} },
-      { txt: 'Entre 5 e 10 anos', val: '5-10', w: {} },
-      { txt: 'Mais de 10 anos',   val: '10+',  w: {} }
-    ]
-  },
-  {
     id: 'q2',
     titulo: 'Como você descreveria o clima em casa hoje?',
     tipo: 'emoji',
@@ -300,7 +289,7 @@ function eixoLider(estado) {
   return melhor;
 }
 
-/** Monta a sequência: base → ramo dinâmico → q7 → q8 */
+/** Monta a sequência: base → ramo dinâmico → q7 */
 function proximaPergunta(estado, indice) {
   if (indice < BASE.length) return BASE[indice];
 
@@ -311,12 +300,11 @@ function proximaPergunta(estado, indice) {
   const i = indice - BASE.length;
   if (i < ramo.length) return ramo[i];
   if (i === ramo.length) return Q7;
-  if (i === ramo.length + 1) return Q8;
   return null;
 }
 
 function totalPerguntas() {
-  return BASE.length + 2 /* ramo */ + 2 /* q7 + q8 */;
+  return BASE.length + 2 /* ramo */ + 1 /* q7 */;
 }
 
 /* ─── Intensidade: derivada das respostas, não inventada ──────── */
